@@ -1,0 +1,180 @@
+import tkinter as tk
+from tkinter import messagebox
+import os
+import webbrowser
+
+def elegir_materia():
+    def seleccionar_materia():
+        try:
+            materia = lista_materias.get(lista_materias.curselection())
+            ventana_principal.destroy()
+            seleccionar_prueba(materia)
+        except tk.TclError:
+            messagebox.showerror("Error", "Debes seleccionar una materia.")
+
+    def seleccionar_prueba(materia):
+        def prueba_seleccionada():
+            try:
+                prueba = lista_pruebas.get(lista_pruebas.curselection())
+                ventana_prueba.destroy()
+                mostrar_archivos(materia, prueba)
+            except tk.TclError:
+                messagebox.showerror("Error", "Debes seleccionar una prueba.")
+
+        def volver_atras():
+            ventana_prueba.destroy()
+            elegir_materia()
+
+        ventana_prueba = tk.Toplevel()
+        ventana_prueba.title("Seleccionar prueba")
+        ventana_prueba.grab_set()  # Hace que la ventana sea modal
+        tk.Label(ventana_prueba, text=f"¿Qué prueba deseas estudiar o revisar para {materia}?", font=("Arial", 14)).pack(pady=10)
+
+        pruebas_disponibles = {
+            "Cálculo 1": ["Talleres", "Controles", "PEP", "POR"],
+            "Cálculo 2": ["Talleres", "Controles", "PEP", "POR"],
+            "Física 1": ["Controles", "PEP", "POR"],
+            "Física 2": ["PEP", "POR"],
+            "Álgebra 1": ["Talleres", "Controles", "PEP", "POR"],
+            "Álgebra 2": ["Controles", "PEP", "POR"],
+            "Química General": ["Controles", "PEP", "POR"]
+        }
+
+        lista_pruebas = tk.Listbox(ventana_prueba, font=("Arial", 12))
+        for prueba in pruebas_disponibles.get(materia, []):
+            lista_pruebas.insert(tk.END, prueba)
+        lista_pruebas.pack(pady=10)
+        tk.Button(ventana_prueba, text="Seleccionar", command=prueba_seleccionada, font=("Arial", 12)).pack(pady=10)
+        tk.Button(ventana_prueba, text="Volver atrás", command=volver_atras, font=("Arial", 12)).pack(pady=10)
+
+        ventana_prueba.mainloop()
+
+    def mostrar_archivos(materia, prueba):
+        def abrir_pdf():
+            try:
+                archivo = lista_archivos.get(lista_archivos.curselection())
+                ruta_archivo = os.path.join(base_path, materia, prueba, archivo)
+                webbrowser.open_new(ruta_archivo)
+            except tk.TclError:
+                messagebox.showerror("Error", "Debes seleccionar un archivo para abrir.")
+
+        def volver_atras():
+            ventana_archivos.destroy()
+            seleccionar_prueba(materia)
+
+        base_path = os.getcwd()
+        carpeta_prueba = os.path.join(base_path, materia, prueba)
+
+        if not os.path.exists(carpeta_prueba):
+            messagebox.showerror("Error", f"No se encontró la carpeta:\n{carpeta_prueba}")
+            return
+
+        archivos_pdf = [f for f in os.listdir(carpeta_prueba) if f.endswith(".pdf")]
+
+        if not archivos_pdf:
+            messagebox.showerror("Error", f"No se encontraron archivos PDF en:\n{carpeta_prueba}")
+            return
+
+        ventana_archivos = tk.Toplevel()
+        ventana_archivos.title(f"Archivos en {materia} - {prueba}")
+        ventana_archivos.grab_set()  # Hace que la ventana sea modal
+        tk.Label(ventana_archivos, text="Selecciona un archivo para abrir:", font=("Arial", 14)).pack(pady=10)
+
+        lista_archivos = tk.Listbox(ventana_archivos, font=("Arial", 12))
+        for archivo in archivos_pdf:
+            lista_archivos.insert(tk.END, archivo)
+        lista_archivos.pack(pady=10)
+
+        tk.Button(ventana_archivos, text="Abrir archivo", command=abrir_pdf, font=("Arial", 12)).pack(pady=10)
+        tk.Button(ventana_archivos, text="Volver atrás", command=volver_atras, font=("Arial", 12)).pack(pady=10)
+
+        ventana_archivos.mainloop()
+
+    ventana_principal = tk.Tk()
+    ventana_principal.title("Seleccionar materia")
+    tk.Label(ventana_principal, text="¿Qué ramo te interesa consultar?", font=("Arial", 14)).pack(pady=10)
+    lista_materias = tk.Listbox(ventana_principal, font=("Arial", 12))
+    materias = ["Cálculo 1", "Cálculo 2", "Física 1", "Física 2", "Álgebra 1", "Álgebra 2", "Química General"]
+    for materia in materias:
+        lista_materias.insert(tk.END, materia)
+    lista_materias.pack(pady=10)
+    tk.Button(ventana_principal, text="Seleccionar", command=seleccionar_materia, font=("Arial", 12)).pack(pady=10)
+    tk.Button(ventana_principal, text="Salir", command=ventana_principal.destroy, font=("Arial", 12)).pack(pady=10)
+    ventana_principal.mainloop()
+
+
+def calendario(dia,mes,aa):
+    import datetime
+    fecha_y_hora = datetime.datetime.now()
+
+    fecha_actual = str(fecha_y_hora.date())
+
+    fecha = fecha_actual.split("-")
+
+    if dia<= int(fecha[2]) and mes>=int(fecha[1]) and aa>=int(fecha[0]):
+        dd_r = int(fecha[2])-dia
+        mm_r = mes-int(fecha[1])
+        aaaa_r = aa-int(fecha[0])
+    elif dia>int(fecha[2]) and mes>=int(fecha[1]) and aa>=int(fecha[0]):
+        dd_r = dia-int(fecha[2])
+        mm_r = mes-int(fecha[1])
+        aaaa_r = aa-int(fecha[0])
+    elif dia>int(fecha[2]) and mes<int(fecha[1]) and aa>=int(fecha[0]):
+        dd_r = dia-int(fecha[2])
+        mm_r = (mes + 12) - int(fecha[1])
+        aaaa_r = (aa-int(fecha[0])) - 1
+    elif dia<= int(fecha[2]) and mes<int(fecha[1]) and aa>=int(fecha[0]):
+        dd_r = int(fecha[2])-dia
+        mm_r = (mes + 12) - int(fecha[1])  
+        aaaa_r = (aa-int(fecha[0])) - 1
+    if dd_r == 1 and aaaa_r == 0:
+        r = print("Quedan "+str(dd_r)+" día y "+str(mm_r)+" meses para la prueba.")
+    elif aaaa_r == 0:
+        r = print("Quedan "+str(dd_r)+" días y "+str(mm_r)+" meses para la prueba.")
+    elif dd_r == 1:
+        r = print("Quedan "+str(dd_r)+" día, "+str(mm_r)+" meses y "+str(aaaa_r)+" años para prueba.")
+    else:
+        r = print("Quedan "+str(dd_r)+" días ,"+str(mm_r)+" meses y "+str(aaaa_r)+" años para prueba.")
+    return r
+def calcular_promedio(nota, porcentaje):
+    return ( nota*(porcentaje/100))
+
+while True:
+    print("Menu")
+    print("1 Calendario")
+    print("2 Calcular nota faltante")
+    print("3 Material de estudio")
+    entra = int(input("Ingrese función deseada: "))
+    if entra == 1:
+        dd=int(input("Ingrese el día de la prueba: "))
+        mm=int(input("Ingrese el mes de la prueba: "))
+        aa=int(input("Ingrese el año de la prueba: "))
+        resultado = calendario(dd,mm,aa)
+    elif entra == 2:
+        cantidad = int(input("Ingrese cantidad de notas que lleva hasta el momento: "))
+        nota = 3.95
+        i = 1
+        l = []
+        total = 0
+        porcentaje = 100
+        while cantidad >= i:
+            a = float(input("Ingrese la nota: "))
+            
+            b = float(input("Ingrese porcentaje de la nota: "))
+            print("")
+            
+            prom = calcular_promedio(a,b)
+            l.append(prom)
+            porcentaje -= b
+            i += 1
+        for x in l:
+            total += x
+        j = nota - total
+        k = (j / (porcentaje/100))
+        final = round(k, 2)
+        print("La nota que usted necesita para aprobar es un",final)
+        print("")
+    elif entra == 3:
+        elegir_materia()
+        
+        
